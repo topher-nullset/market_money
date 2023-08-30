@@ -9,6 +9,8 @@ Rails.application.routes.draw do
       resources :markets, only: [:index, :show, :create, :destroy] do
         resources :vendors, only: [:index]
       end
+
+      resources :vendors, only: [:show, :create, :update, :destroy]
     end
   end
 end
