@@ -9,30 +9,42 @@ RSpec.describe "Api::V0::Markets", type: :request do
       expect(response).to have_http_status(:success)
 
       parsed = JSON.parse(response.body)
-      expect(parsed.length).to eq(3)
+      expect(parsed).to include('data')
+      expect(parsed['data']).to be_an(Array)
+      expect(parsed['data'].length).to eq(3)
 
-      first = parsed.first
-      expect(first).to include('vendor_count')
-      expect(first['vendor_count']).to eq(3)
+      first = parsed['data'].first
+      expect(first).to include('attributes', 'id', 'type')
+
+      attributes = first['attributes']
+      expect(attributes).to include('name', 'street', 'city', 'county', 'state', 'zip', 'lat', 'lon', 'vendor_count')
+
+      vendor_count = attributes['vendor_count']
+      expect(vendor_count).to eq(3)
     end
   end
 
   describe 'GET /api/v0/markets/:id' do
-    it 'returns a JSON response with a market and vendor count' do
+    it 'returns a JSON response with a specific market by id with vendor count' do
       market = create(:market, :with_vendor)
 
       get "/api/v0/markets/#{market.id}"
       expect(response).to have_http_status(:success)
 
       parsed = JSON.parse(response.body)
-      expect(parsed).to include('vendor_count')
-      expect(parsed['vendor_count']).to eq(3)
+      expect(parsed['data']).to include('attributes', 'id', 'type')
+
+      data = parsed['data']
+      expect(data['attributes']).to include('name', 'street', 'city', 'county','state', 'zip', 'lat', 'lon', 'vendor_count')
+
+      attributes = data['attributes']
+      expect(attributes['vendor_count']).to eq(3)
     end
 
     it 'returns a 404 error if the market does not exist' do
       get "/api/v0/markets/1"
       expect(response).to have_http_status(:not_found)
-
+      
       parsed = JSON.parse(response.body)
       expect(parsed).to include('errors')
       expect(parsed['errors'].first).to include('detail')

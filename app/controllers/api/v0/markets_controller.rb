@@ -2,14 +2,13 @@ module Api
   module V0
     class MarketsController < ApplicationController
       def index
-        @markets = Market.includes(:vendors)
-        render json: @markets, methods: :vendor_count
+        render json: MarketSerializer.new(Market.all)
       end
 
       def show
-        @market = Market.find_by(id: params[:id])
-        if @market
-          render json: @market, methods: :vendor_count
+        market = Market.find_by(id: params[:id])
+        if market
+          render json: MarketSerializer.new(Market.find(params[:id]))
         else
           render json: { errors: [{ detail: "Couldn't find Market with 'id'=#{params[:id]}" }] }, status: :not_found
         end
