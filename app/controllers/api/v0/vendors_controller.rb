@@ -30,6 +30,30 @@ module Api
         end
       end
 
+      def update
+        vendor = Vendor.find_by(id: params[:id])
+        if vendor
+          if vendor.update(vendor_params)
+            render json: VendorSerializer.new(vendor)
+          else
+            render json: ErrorSerializer.serialize(vendor.errors), status: :bad_request
+          end
+        else
+          error_message = "Couldn't find Vendor with 'id'=#{params[:id]}"
+          render json: ErrorSerializer.serialize(error_message), status: :not_found
+        end
+      end
+
+      def destroy
+        vendor = Vendor.find_by(id: params[:id])
+        if vendor
+          vendor.destroy
+        else
+          error_message = "Couldn't find Vendor with 'id'=#{params[:id]}"
+          render json: ErrorSerializer.serialize(error_message), status: :not_found
+        end
+      end
+
       private
 
       def vendor_params

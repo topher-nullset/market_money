@@ -74,7 +74,6 @@ RSpec.describe "Api::V0::Markets", type: :request do
 
     it 'returns a 404 error if the market does not exist' do
       get "/api/v0/markets/1/vendors"
-
       expect(response).to have_http_status(:not_found)
       
       parsed = JSON.parse(response.body)
