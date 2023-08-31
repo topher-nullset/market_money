@@ -82,4 +82,45 @@ RSpec.describe "Api::V0::Markets", type: :request do
       expect(parsed['errors'].first['detail']).to eq("Couldn't find Market with 'id'=1")
     end
   end
+
+  describe 'GET /api/v0/markets/search' do
+    context 'with valid parameters' do
+      it 'returns matching markets' do
+        market1 = create(:market, name: 'Market A', city: 'Anchorage', state: 'Alaska')
+        market2 = create(:market, name: 'Market B', city: 'Denver', state: 'Colorado')
+
+        get '/api/v0/markets/search', params: { state: 'Alaska' }
+        expect(response).to have_http_status(:success)
+
+        parsed = JSON.parse(response.body)
+        expect(parsed).to include('data')
+        expect(parsed['data']).to be_an(Array)
+        expect(parsed['data'].length).to eq(1)
+        expect(parsed['data'][0]['id']).to eq(market1.id.to_s)
+      end
+
+      it 'returns an empty array when no markets match' do
+        get '/api/v0/markets/search', params: { state: 'California' }
+
+        expect(response).to have_http_status(:success)
+
+        parsed = JSON.parse(response.body)
+        expect(parsed).to include('data')
+        expect(parsed['data']).to be_an(Array)
+        expect(parsed['data']).to be_empty
+      end
+    end
+
+    context 'with invalid parameters' do
+      it 'returns an error message' do
+        get '/api/v0/markets/search', params: { city: 'Anchorage', name: 'Market A' }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+
+        parsed = JSON.parse(response.body)
+        expect(parsed).to include('errors')
+        expect(parsed['errors'][0]['detail']).to eq('Invalid combination of parameters')
+      end
+    end
+  end
 end
