@@ -7,11 +7,7 @@ module Api
           vendor = Vendor.find_by(id: params[:vendor_id])
           if vendor
             market_vendor = MarketVendor.new(market: market, vendor: vendor)
-            if market_vendor.save
-              render json: MarketVendorSerializer.new(market_vendor), status: :created
-            else
-              render json: ErrorSerializer.serialize(market_vendor.errors), status: :bad_request
-            end
+            render json: MarketVendorSerializer.new(market_vendor), status: :created
           else
             error_message = "Couldn't find Vendor with 'id'=#{params[:vendor_id]}"
             render json: ErrorSerializer.serialize(error_message), status: :not_found
