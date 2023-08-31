@@ -42,4 +42,54 @@ RSpec.describe "Api::V0::Vendors", type: :request do
       expect(parsed['errors'].first['detail']).to eq("Couldn't find Vendor with 'id'=1")
     end
   end
+
+  describe 'POST /api/v0/vendors/' do
+    it 'creates a new vendor' do
+      vendor_params = {
+        name: 'Buzzy Bees',
+        description: 'local honey and wax products',
+        contact_name: 'Berly Couwer',
+        contact_phone: '8389928383',
+        credit_accepted: false
+      }
+
+      post '/api/v0/vendors', params: vendor_params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+
+      expect(response).to have_http_status(:created)
+      parsed = JSON.parse(response.body)
+      expect(parsed).to include('data')
+
+      data = parsed['data']
+      expect(data).to include('id', 'type', 'attributes')
+      expect(data['attributes']).to include(
+        'name' => 'Buzzy Bees',
+        'description' => 'local honey and wax products',
+        'contact_name' => 'Berly Couwer',
+        'contact_phone' => '8389928383',
+        'credit_accepted' => false
+      )
+    end
+
+    it 'returns an error if vendor creation fails' do
+      invalid_vendor_params = {
+        name: '', # Invalid name
+        description: '', # Invalid description
+        contact_name: 'John Doe',
+        contact_phone: '1234567890',
+        credit_accepted: true
+      }
+
+      post '/api/v0/vendors', params: invalid_vendor_params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+
+      expect(response).to have_http_status(:bad_request)
+      parsed = JSON.parse(response.body)
+      expect(parsed).to include('errors')
+
+      errors = parsed['errors']
+      expect(errors.first).to include('detail')
+
+      detail = errors.first['detail']
+      expect(detail).to eq("Name can't be blank, Description can't be blank")
+    end
+  end
 end

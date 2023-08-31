@@ -3,7 +3,7 @@ FactoryBot.define do
     name { Faker::Food.unique.dish }
     description { Faker::Company.bs }
     contact_name { Faker::Name.unique.name }
-    contact_phone { Faker::PhoneNumber.unique.phone_number }
+    contact_phone { Faker::Number.number(digits: 10) }
     credit_accepted { [true, false].sample }
 
     trait :with_market do
