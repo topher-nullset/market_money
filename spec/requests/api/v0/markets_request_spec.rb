@@ -123,4 +123,26 @@ RSpec.describe "Api::V0::Markets", type: :request do
       end
     end
   end
+
+  describe 'GET /api/v0/markets/:id/nearest_atms' do
+    it 'returns nearest ATMs' do
+      market = create(:market)
+
+      get "/api/v0/markets/#{market.id}/nearest_atms"
+      expect(response).to have_http_status(:success)
+      binding.pry
+      parsed = JSON.parse(response.body)
+      expect(parsed).to include('data')
+      expect(parsed['data']).to be_an(Array)
+      expect(parsed['data'].length).to eq(1)
+      expect(parsed['data'][0]['name']).to eq('ATM 1')
+    end
+  
+    it 'returns an error if market does not exist' do
+      get '/api/v0/markets/999/nearest_atms'
+      expect(response).to have_http_status(:not_found)
+      parsed = JSON.parse(response.body)
+      expect(parsed).to include('errors')
+    end
+  end
 end

@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       get '/markets/search', to:'markets#search'
       resources :markets, only: [:index, :show, :create, :destroy] do
         resources :vendors, only: [:index]
+        member do
+          get :nearest_atms
+        end
       end
       
       resources :vendors, only: [:show, :create, :update, :destroy]

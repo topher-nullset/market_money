@@ -25,6 +25,20 @@ module Api
         end
       end
 
+      def nearest_atms
+        market = Market.find_by(id: params[:id])
+        if market
+          tomtom_facade = TomtomFacade.new
+          atms_data = tomtom_facade.find_nearby_atms(market)
+          atms = atms_data.map { |data| Atm.new(data) }
+
+          render json: { data: atms }
+        else
+          error_message = "Couldn't find Market with 'id'=#{params[:id]}"
+          render json: ErrorSerializer.serialize(error_message), status: :not_found
+        end
+      end
+
       private
 
       def invalid_combination_of_parameters?
